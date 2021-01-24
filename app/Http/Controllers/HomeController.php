@@ -55,8 +55,30 @@ class HomeController extends Controller
 
     public function store(Request $request)
     {
-        $code = rand(100000, 999999);
-        
+        function generate_string($input, $strength = 16)
+        {
+            $input_length = strlen($input);
+            $random_string = '';
+            for ($i = 0; $i < $strength; $i++) {
+                $random_character = $input[mt_rand(0, $input_length - 1)];
+                $random_string .= $random_character;
+            }
+
+            return $random_string;
+        }
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $code =  generate_string($permitted_chars, 7);
+        $affidavit = $request->file('affidavit')->store('photos/affidavit');
+        $passport = $request->file('passport')->store('photos/passport');
+   
+
+        $others = '';
+        foreach ($request->others as $photo) {
+            $other = $photo->store('photos/other');
+            $others .= $other . ',';
+
+        }
+
         $complaints = Complaints::create([
             'name' => $request->name,
             'email' => $request->email,
@@ -71,29 +93,13 @@ class HomeController extends Controller
             'complaint_status' => 'awaiting',
             'staff_assigned' => 'nil',
             'user_id' => 'nil',
-            'year' => date('Y'),
-            'month' => date('m'),
-        ]);
-
-        $affidavit = $request->affidavit;
-        $affidavit->store('photos/affidavit');
-        $passport = $request->passport;
-        $passport->store('photos/passport');
-        $others = '';
-
-        foreach ($request->others as $photo) {
-            $others .= $photo . ',';
-            $photo->store('photos/other');
-        }
-
-        ComplaintUploads::create([
-            'complaint_id' => $complaints->id,
             'passport' => $passport,
             'affidavit' => $affidavit,
             'others' => $others,
             'year' => date('Y'),
             'month' => date('m'),
         ]);
+
 
         $awaiting_r = AwaitingReview::create([
             'name' => $request->name,
@@ -109,6 +115,9 @@ class HomeController extends Controller
             'complaint_status' => 'awaiting',
             'staff_assigned' => 'nil',
             'user_id' => 'nil',
+            'passport' => $passport,
+            'affidavit' => $affidavit,
+            'others' => $others,
             'year' => date('Y'),
             'month' => date('m'),
         ]);
@@ -124,20 +133,32 @@ class HomeController extends Controller
 
 
     public function complaint_submit_store(Request $request){
+        
+        function generate_string($input, $strength = 16)
+        {
+            $input_length = strlen($input);
+            $random_string = '';
+            for ($i = 0; $i < $strength; $i++) {
+                $random_character = $input[mt_rand(0, $input_length - 1)];
+                $random_string .= $random_character;
+            }
 
-        $code = rand(100000, 999999);
-        $auth = Auth::user();
-
-        $affidavit = $request->affidavit;
-        $affidavit->store('photos/affidavit');
-        $passport = $request->passport;
-        $passport->store('photos/passport');
-        $others = '';
-
-        foreach ($request->others as $photo) {
-            $others .= $photo . ',';
-            $photo->store('photos/other');
+            return $random_string;
         }
+        $permitted_chars = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $code =  generate_string($permitted_chars, 7);
+        $affidavit = $request->file('affidavit')->store('photos/affidavit');
+        $passport = $request->file('passport')->store('photos/passport');
+   
+
+        $others = '';
+        foreach ($request->others as $photo) {
+            $other = $photo->store('photos/other');
+            $others .= $other . ',';
+
+
+        }
+        $auth = Auth::user();
 
         $complaints = Complaints::create([
             'name' => $auth->name,
@@ -153,19 +174,13 @@ class HomeController extends Controller
             'complaint_status' => 'awaiting',
             'staff_assigned' => 'nil',
             'user_id' => $auth->id,
-            'year' => date('Y'),
-            'month' => date('m'),
-        ]);
-
-
-        ComplaintUploads::create([
-            'complaint_id' => $complaints->id,
             'passport' => $passport,
             'affidavit' => $affidavit,
             'others' => $others,
             'year' => date('Y'),
             'month' => date('m'),
         ]);
+
 
         $awaiting_r = AwaitingReview::create([
            'name' => $auth->name,
@@ -181,6 +196,9 @@ class HomeController extends Controller
             'complaint_status' => 'awaiting',
             'staff_assigned' => 'nil',
             'user_id' => $auth->id,
+            'passport' => $passport,
+            'affidavit' => $affidavit,
+            'others' => $others,
             'year' => date('Y'),
             'month' => date('m'),
         ]);
