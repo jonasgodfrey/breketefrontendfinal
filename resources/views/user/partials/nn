@@ -1,0 +1,23 @@
+@extends('layouts.app')
+@push('page_css')
+
+@endpush
+@section('third_party_stylesheets')
+
+@endsection
+
+@section('content')
+
+@endsection
+@section('third_party_scripts')
+    <script>
+      $(function(){
+          $('select.styled').customSelect();
+           $('#myTable').DataTable();
+      });
+   
+    $(document).ready( function () {
+       
+    } );
+</script>
+@endsection
